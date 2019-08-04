@@ -7,16 +7,17 @@ const config = {
     user: 'postgres',
     password: '090696'
 };
+
 //Import our postgreSQL module
 const pgp = require('pg-promise')();
 const db = pgp(config);
-const createAlbum = async function () {
+const createAlbum = async function() {
     const title = await prompt('Album Title: ');
     const artist = await prompt('What is the name of the artist?: ')
     const query = "SELECT id FROM artists WHERE name ilike $1";
     try {
         var artist_Id = await db.one(query, artist).catch(e => console.log(e));
-    } catch{
+    } catch {
         console.error(`Artist doesn't exist, creating artist ${artist}`);
         artist_Id = await createArtist();
     }
@@ -41,12 +42,18 @@ const createAlbum = async function () {
     return
 };
 
-const createArtist = async function () {
+const createArtist = async function() {
     const name = await prompt('What is the name of the artist?: ');
     const query = "SELECT * FROM artists WHERE name iLike '%$1%'";
     var artist = {}
     var exists;
-    await db.one(query, name).then(result => { exists = true; artist = result }).catch(() => { exists = false; console.log(`Artist doesn't appear to be in our db lets create it`) })
+    await db.one(query, name).then(result => {
+        exists = true;
+        artist = result
+    }).catch(() => {
+        exists = false;
+        console.log(`Artist doesn't appear to be in our db lets create it`)
+    })
     if (exists) {
         console.log(`The artist exists here is the info: \n ${artist.name} \n id: ${artist.id}`)
     } else {
@@ -60,7 +67,7 @@ const createArtist = async function () {
     return parseInt(artist.id)
 }
 
-const createTrack = async function () {
+const createTrack = async function() {
     const track = {}
     track.title = await prompt('What is the name of the track?: ');
     track.albumName = await prompt('What album is it in?: ');
@@ -69,7 +76,7 @@ const createTrack = async function () {
         const album = await db.one(query, track).catch(e => console.log(e))
         var albumExists = true;
         track.albumId = album.id;
-    } catch{
+    } catch {
         albumExists = false
     }
     if (albumExists) {
@@ -80,7 +87,7 @@ const createTrack = async function () {
             const querySongs = "SELECT id FROM songs WHERE title ilike '%$1%' RETURNING id"
             inSongs = true
             song = await db.one(querySongs, track.title)
-        } catch{
+        } catch {
             inSongs = false;
         }
         if (!inSongs) {
@@ -98,16 +105,16 @@ const createTrack = async function () {
     return
 }
 
-const makeAlbums = function (argument) {
+const musicRecords = function(argument) {
     switch (argument) {
         case 'album' || 'albums':
             createAlbum().then(() => {
                 prompt('Would you like to create another one?: ').then(val => {
                     if (val === 'yes' || val === 'y' || val === '') {
-                        return makeAlbums('album')
+                        return musicRecords('album')
                     } else {
                         prompt.finish()
-                        return makeAlbums()
+                        return musicRecords()
                     }
                 })
             })
@@ -116,10 +123,10 @@ const makeAlbums = function (argument) {
             createArtist().then(() => {
                 prompt('Would you like to create another one?: ').then(val => {
                     if (val === 'yes' || val === 'y' || val === '') {
-                        return makeAlbums('artist')
+                        return musicRecords('artist')
                     } else {
                         prompt.finish()
-                        return makeAlbums()
+                        return musicRecords()
                     }
                 })
             })
@@ -128,17 +135,18 @@ const makeAlbums = function (argument) {
             createTrack().then(() => {
                 prompt('Would you like to create another one?: ').then(val => {
                     if (val === 'yes' || val === 'y' || val === '') {
-                        return makeAlbums('track')
+                        return musicRecords('track')
                     } else {
                         prompt.finish()
-                        return makeAlbums()
+                        return musicRecords()
                     }
                 })
             })
             break;
-        default: prompt('What will you like to do? \n').then(val => { makeAlbums(val) })
+        default:
+            prompt('What will you like to do? \n').then(val => { musicRecords(val) })
     }
     return
 }
 
-module.exports = makeAlbums;
+module.exports = musicRecords;

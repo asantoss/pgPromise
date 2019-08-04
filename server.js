@@ -1,11 +1,12 @@
-const makeAlbums = require('./create_album')
-//PG config
+const musicRecords = require('./create_album');
+const dotEnv = require('dotenv')
+    //PG config
 const config = {
     host: 'localhost',
     port: 5432,
     database: 'restaurant',
-    user: 'postgres',
-    password: '090696'
+    user: process.env.DBUSER,
+    password: process.env.DBPASS
 };
 //Import our postgreSQL module
 const pgp = require('pg-promise')();
@@ -28,4 +29,4 @@ const db = pgp(config);
 //         })
 //     })
 
-makeAlbums()
+musicRecords()
