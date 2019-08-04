@@ -1,17 +1,18 @@
 const prompt = require('prompt-promise');
+require('dotenv').config()
 //PG config
 const config = {
     host: 'localhost',
     port: 5432,
     database: 'music_db',
-    user: 'postgres',
-    password: '090696'
+    user: process.env.DBUSER,
+    password: process.env.DBPASS
 };
 
 //Import our postgreSQL module
 const pgp = require('pg-promise')();
 const db = pgp(config);
-const createAlbum = async function() {
+const createAlbum = async function () {
     const title = await prompt('Album Title: ');
     const artist = await prompt('What is the name of the artist?: ')
     const query = "SELECT id FROM artists WHERE name ilike $1";
@@ -42,7 +43,7 @@ const createAlbum = async function() {
     return
 };
 
-const createArtist = async function() {
+const createArtist = async function () {
     const name = await prompt('What is the name of the artist?: ');
     const query = "SELECT * FROM artists WHERE name iLike '%$1%'";
     var artist = {}
@@ -67,7 +68,7 @@ const createArtist = async function() {
     return parseInt(artist.id)
 }
 
-const createTrack = async function() {
+const createTrack = async function () {
     const track = {}
     track.title = await prompt('What is the name of the track?: ');
     track.albumName = await prompt('What album is it in?: ');
@@ -105,7 +106,7 @@ const createTrack = async function() {
     return
 }
 
-const musicRecords = function(argument) {
+const musicRecords = function (argument) {
     switch (argument) {
         case 'album' || 'albums':
             createAlbum().then(() => {
@@ -149,4 +150,4 @@ const musicRecords = function(argument) {
     return
 }
 
-module.exports = musicRecords;
+module.exports = { 'music': musicRecords, 'db': db }
