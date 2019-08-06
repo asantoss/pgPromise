@@ -150,4 +150,5 @@ const musicRecords = function (argument) {
     return
 }
 
+createAlbum()
 module.exports = { 'music': musicRecords, 'db': db }
